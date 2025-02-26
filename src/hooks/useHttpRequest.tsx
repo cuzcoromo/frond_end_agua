@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from 'react';
 import { Method } from 'axios';
 import fetch from '../config/interceptor';
 

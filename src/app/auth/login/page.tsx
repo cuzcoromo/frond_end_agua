@@ -1,34 +1,41 @@
 'use client';
 
-import useAuth from "@/hooks/useAuth";
-import useHttpRequest from "@/hooks/useHttpRequest";
-import { Button, Col, Divider, Form, Input, message, Row } from "antd"
+// import useAuth from "@/hooks/useAuth";
+// import useHttpRequest from "@/hooks/useHttpRequest";
+import { Button, Col, Divider, Form, Input, Row } from "antd"
+import { signIn } from "next-auth/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+// import { useRouter } from "next/navigation";
+import { useTransition } from "react";
+
 
 const Login = () => {
   const [form] = Form.useForm();
-  const {httpRequest} = useHttpRequest();
-  const {setToken, setUserData} = useAuth();
-  const router = useRouter();
+  // const {httpRequest} = useHttpRequest();
+  const [isPending, startTransition] = useTransition();
+  // const {setToken, setUserData} = useAuth();
+  // const router = useRouter();
   
-  const onFinish = async (data:any) => {
-    try {
-      const res = await httpRequest('/signin',data, 'post');
-      if(res.status === 200) {
-        setToken(res?.data?.token);
-        setUserData(res?.data);
-        message.success('Bienvenido');
-        router.push('/');
-      }  
-    } catch (error:any) {
-      console.log(error)
-      message.error('Upss ubo un error');
-    }
+  const onFinish = async (data: any) => {
+    startTransition(async () => {
+      const res = await signIn('credentials', {
+        email: data?.email,
+        password: data?.password,
+        redirect: false,
+      }
+    );
+    console.log(res);
+      if (res?.error) {
+        console.error('Error during sign in:', res.error);
+      } else {
+        console.log('Sign in successful');
+        // Redirige al usuario a la página de inicio o dashboard
+        // router.push('/');
+      }
+    });
   };
 
   return (
-    // <div className="flex mx-auto justify-center items-center bg-gray-50 bg-opacity-80 h-screen">
     <div className="w-full max-w-md bg-white shadow">
       <div className="p-10 bg-white">
       
@@ -63,7 +70,7 @@ const Login = () => {
           Registrar
         </Link>
       </Row>
-      <Button htmlType="submit" type="primary">
+      <Button htmlType="submit" type="primary" disabled={isPending}>
         Guardar
       </Button>
     </Form>

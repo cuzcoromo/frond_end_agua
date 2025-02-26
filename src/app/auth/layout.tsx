@@ -1,20 +1,14 @@
-'use client';
 
+import { auth } from '@/auth.config';
 import Navbar from '@/components/Navbar';
-import useAuth from '@/hooks/useAuth';
-import { useRouter } from 'next/navigation';
-import React, { useEffect } from 'react'
+import { redirect } from 'next/navigation';
+import React from 'react'
 
-export default function AuthLayout ({children}:{children: React.ReactNode;}) {
-  const {token} = useAuth();
-  const router = useRouter();
+export default async function AuthLayout ({children}:{children: React.ReactNode;}) {
+  const session = await auth();
 
-  useEffect( () =>{
-    if( token) router.push('/');
-  }, [token, router]);
-
-  if(token){
-    return null;
+  if(session){
+    redirect('/');
   }
 
   return (
